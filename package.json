@@ -14,7 +14,8 @@
     "express": "^4.15.2",
     "express-session": "^1.17.3",
     "fs": "^0.0.1-security",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "pug": "^3.0.2"
   },
   "engines": {
     "node": "8.9.1"
