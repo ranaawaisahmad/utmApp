@@ -4,7 +4,7 @@
   "description": "A sample Node.js app using Express 4",
   "main": "index.js",
   "scripts": {
-    "start": "node project/start.js"
+    "start": "babel-node index.js"
   },
   "dependencies": {
     "@hubspot/api-client": "^9.1.0",
@@ -28,5 +28,10 @@
     "heroku",
     "express"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.22.10",
+    "@babel/node": "^7.22.10",
+    "@babel/preset-env": "^7.22.10"
+  }
 }
