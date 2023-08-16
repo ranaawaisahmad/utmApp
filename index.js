@@ -123,45 +123,40 @@ app.listen(3000, () => console.log('App running here: http://localhost:3000'));
 
 // function for updating fields 
 async function updateContact(contactId, accessToken) {
-    try {
-      // Get the contact you want to update (you can replace 'CONTACT_ID' with the actual contact ID)
-      //const contactId = 'CONTACT_ID';
-
-      //const getResponse = await hubspotClient.crm.contacts.basicApi.getById(contactId);
-      
-      const hubspotClient = new hubspot.Client({ "accessToken": accessToken});
-      // Populate UTM parameters into custom properties
-      var pageUrl = 'https://www.example.com/?utm_campaign=test_campaign&utm_medium=test_medium&utm_source=test_source&utm_content=test_content&utm_term=test_term&campaign_id=123&user_id=456';
-      var urlParams = new URLSearchParams(pageUrl.split('?')[1]);
-  
-      // Update the contact with the merged properties
-      const updateData = {
-        properties: {
-          utm_campaign1: urlParams.get('utm_campaign') || '',
-          utm_source1: urlParams.get('utm_source') || '',
-          utm_medium1: urlParams.get('utm_medium') || '',
-          utm_term1: urlParams.get('utm_term') || '',
-          utm_content1: urlParams.get('utm_content') || '',
-          user_id: urlParams.get('user_id') || '',
-          utm_campaign_first_touch: urlParams.get('utm_campaign') || '',
-          utm_source_first_touch: urlParams.get('utm_source') || '',
-          utm_medium_first_touch: urlParams.get('utm_medium') || '',
-          utm_term_first_touch: urlParams.get('utm_term') || '',
-          utm_content_first_touch: urlParams.get('utm_content') || '',
-          utm_campaign_last_touch: urlParams.get('utm_campaign') || '',
-          utm_source_last_touch: urlParams.get('utm_source') || '',
-          utm_medium_last_touch: urlParams.get('utm_medium') || '',
-          utm_term_last_touch: urlParams.get('utm_term') || '',
-          utm_content_last_touch: urlParams.get('utm_content') || '',
-          // Add more properties as needed based on your HubSpot configuration
-        }
-      };
-  
-      const updateResponse = await hubspotClient.crm.contacts.basicApi.update(contactId, updateData);
-      console.log('Data added successfully against this ID:', updateResponse);
-      console.log(JSON.stringify(updateResponse.id, null, 2));
+    try {      
+        const hubspotClient = new hubspot.Client({ "accessToken": accessToken});
+        // Populate UTM parameters into custom properties
+        var pageUrl = 'https://www.example.com/?utm_campaign=test_campaign&utm_medium=test_medium&utm_source=test_source&utm_content=test_content&utm_term=test_term&campaign_id=123&user_id=456';
+        var urlParams = new URLSearchParams(pageUrl.split('?')[1]);
+    
+        // Update the contact with the merged properties
+        const updateData = {
+            properties: {
+            utm_campaign1: urlParams.get('utm_campaign') || '',
+            utm_source1: urlParams.get('utm_source') || '',
+            utm_medium1: urlParams.get('utm_medium') || '',
+            utm_term1: urlParams.get('utm_term') || '',
+            utm_content1: urlParams.get('utm_content') || '',
+            user_id: urlParams.get('user_id') || '',
+            utm_campaign_first_touch: urlParams.get('utm_campaign') || '',
+            utm_source_first_touch: urlParams.get('utm_source') || '',
+            utm_medium_first_touch: urlParams.get('utm_medium') || '',
+            utm_term_first_touch: urlParams.get('utm_term') || '',
+            utm_content_first_touch: urlParams.get('utm_content') || '',
+            utm_campaign_last_touch: urlParams.get('utm_campaign') || '',
+            utm_source_last_touch: urlParams.get('utm_source') || '',
+            utm_medium_last_touch: urlParams.get('utm_medium') || '',
+            utm_term_last_touch: urlParams.get('utm_term') || '',
+            utm_content_last_touch: urlParams.get('utm_content') || '',
+            // Add more properties as needed based on your HubSpot configuration
+            }
+        };
+    
+        const updateResponse = await hubspotClient.crm.contacts.basicApi.update(contactId, updateData);
+        console.log('Data added successfully against this ID:', updateResponse);
+        console.log(JSON.stringify(updateResponse.id, null, 2));
     } catch (e) {
-      e.message === 'HTTP request failed'
+        e.message === 'HTTP request failed'
         ? console.error(JSON.stringify(e.response, null, 2))
         : console.error(e);
     }
