@@ -60,6 +60,7 @@ const getToken = async (userId) => {
 app.get('/', async (req, res) => {
     if (isAuthorized(req.sessionID)) {
         const accessToken = await getToken(req.sessionID);
+        createProperties(accessToken);
         const headers = {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
@@ -120,7 +121,6 @@ app.get('/oauth-callback', async (req, res) => {
 app.listen(3000, () => console.log('App running here: http://localhost:3000'));
 
 
-
 // function for updating fields 
 async function updateContact(contactId, accessToken) {
     try {
@@ -165,5 +165,201 @@ async function updateContact(contactId, accessToken) {
         ? console.error(JSON.stringify(e.response, null, 2))
         : console.error(e);
     }
-  }
-  
+}
+
+// code for createing custom fields in HubSpot for UTM Tracking App  
+const propertiesToCreate =[
+    {
+      name: "utm_campaign1",
+      label: "UTM_Campaign1",
+      type: "string",
+      fieldType: "text",
+      groupName: "contactinformation",
+      displayOrder: 3,
+      hasUniqueValue: false,
+      hidden: false,
+      formField: true
+    },
+    {
+        name: "utm_source1",
+        label: "UTM_Source1",
+        type: "string",
+        fieldType: "text",
+        groupName: "contactinformation",
+        displayOrder: 4,
+        hasUniqueValue: false,
+        hidden: false,
+        formField: true
+    },
+    {
+        name: "utm_medium1",
+        label: "UTM_Medium1",
+        type: "string",
+        fieldType: "text",
+        groupName: "contactinformation",
+        displayOrder: 5,
+        hasUniqueValue: false,
+        hidden: false,
+        formField: true
+    },
+    {
+          name: "utm_term1",
+          label: "UTM_Term1",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 6,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_content1",
+          label: "UTM_Content1",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 7,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "user_id",
+          label: "User_id",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 8,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_campaign_first_touch",
+          label: "UTM_Campaign(First Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 9,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_source_first_touch",
+          label: "UTM_Source(First Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 10,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_medium_first_touch",
+          label: "UTM_Medium(First Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 11,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_term_first_touch",
+          label: "UTM_Term(First Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 12,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_content_first_touch",
+          label: "UTM_Content(First Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 13,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_campaign_last_touch",
+          label: "UTM_Campaign(Last Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 14,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+    },
+    {
+          name: "utm_source_last_touch",
+          label: "UTM_Source(Last Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 15,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+      },
+      {
+          name: "utm_medium_last_touch",
+          label: "UTM_Medium(Last Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 16,            
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+      },
+      {
+          name: "utm_term_last_touch",
+          label: "UTM_Term(Last Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 17,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+      },
+      {
+          name: "utm_content_last_touch",
+          label: "UTM_Content(Last Touch)",
+          type: "string",
+          fieldType: "text",
+          groupName: "contactinformation",
+          displayOrder: 18,
+          hasUniqueValue: false,
+          hidden: false,
+          formField: true
+      }
+    // Add other properties following the same pattern
+];
+const objectType = "contacts";
+
+// function to create fields in contact obj of HS 
+async function createProperties(accessToken) {
+    const hubspotClient = new hubspot.Client({"accessToken": accessToken});
+    try {
+      for (const property of propertiesToCreate) {
+        const apiResponse = await hubspotClient.crm.properties.coreApi.create(objectType, property);
+        console.log(JSON.stringify(apiResponse, null, 2));
+      }
+    } catch (e) {
+      e.message === 'HTTP request failed'
+        ? console.error(JSON.stringify(e.response, null, 2))
+        : console.error(e);
+    }
+}
