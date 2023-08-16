@@ -1,0 +1,19 @@
+doctype html
+html(lang="en")
+    head
+        title Welcom to HubSpot UTM Tracking System
+        link(rel="stylesheet", href="/styles.css")
+    body
+        h1 Welcom to HubSpot UTM Tracking System
+        //- img(src="https://www.mountainise.com/wp-content/uploads/2022/12/mnt-logo.png", alt="logo")
+        if token
+            p You're authenticated using the token: #{token}
+            h3 You are successfully connected to UTM Tracking App
+            
+            //- ul
+            //-     each contact in contacts
+            //-         li #{contact.properties.firstname} #{contact.properties.lastname}
+
+        else
+            p You're not authenticated
+            p Please install me #[a(href=`${authUrl}`) here]
