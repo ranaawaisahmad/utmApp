@@ -3,6 +3,6 @@
   "description": "A barebones Node.js app using Express 4",
   "repository": "",
   "logo": "",
-  "keywords": ["node", "express", "static"],
+  "keywords": ["node", "express", "static", "pug"],
   "image": "heroku/nodejs"
 }
