@@ -69,14 +69,49 @@ app.get('/', async (req, res) => {
             //limit: 1,
             count: 1,
         };
-        const contacts = 'https://api.hubapi.com/contactslistseg/v1/lists/all/contacts/recent';
+        const recentcreatedcontacts = 'https://api.hubapi.com/contactslistseg/v1/lists/all/contacts/recent';
+        const recentupdatedcontacts = `https://api.hubapi.com/contacts/v1/lists/recently_updated/contacts/recent`;
         async function fetchContactData() {
             try {
-                const resp = await axios.get(contacts, {headers, params});
+                const resp = await axios.get(recentcreatedcontacts, {headers, params});
                 const data = resp.data.contacts[0];
                 const Cid = data.vid;
                 console.log('ContactId:', Cid);
                 updateContact(Cid, accessToken);
+
+                //recently updated contact code start
+                const response = await axios.get(recentupdatedcontacts, {headers, params});
+                const recentlyUpdatedContacts = response.data.contacts;
+                const recentlyUpdatedContactId = recentlyUpdatedContacts[0].vid;
+
+                const create = Number(recentlyUpdatedContacts[0].properties.createdate.value);
+                const modified = Number(recentlyUpdatedContacts[0].properties.lastmodifieddate.value);
+                const createdate = new Date(create);
+                const modifieddate = new Date(modified);
+
+                const formattedDate1 = createdate.toLocaleDateString('en-US', { hour: 'numeric', minute: 'numeric' });
+                const formattedDate2 = modifieddate.toLocaleDateString('en-US', { hour: 'numeric', minute: 'numeric' });
+
+                console.log('createdate: ', formattedDate1);
+                console.log('modifieddate: ', formattedDate2);
+
+                const dateTimeString1 = formattedDate1;
+                const dateTimeString2 = formattedDate2;
+                const timestamp1 = Math.floor(new Date(dateTimeString1).getTime() / 1000);
+                const timestamp2 = Math.floor(new Date(dateTimeString2).getTime() / 1000);
+
+                console.log(timestamp1);
+                console.log(timestamp2);
+
+                if (timestamp1 === timestamp2) {
+                    console.log('created: ', recentlyUpdatedContactId);
+                }
+                else {
+                    console.log('updated: ', recentlyUpdatedContactId);
+                    updateLastTouchOfRecentlyUpdatedContact(recentlyUpdatedContactId, accessToken);
+                }
+                //recently updated contact code end
+
                 const hubspotClient = new hubspot.Client({ "accessToken": accessToken});
                 const getResponse = await hubspotClient.crm.contacts.basicApi.getById(Cid);
                 res.render('home', {
@@ -125,6 +160,12 @@ app.listen(3000, () => console.log('App running here: http://localhost:3000'));
 async function updateContact(contactId, accessToken) {
     try {      
         const hubspotClient = new hubspot.Client({ "accessToken": accessToken});
+
+        // Get contact by ID
+        // const contact = await hubspotClient.crm.contacts.basicApi.getById(contactId);
+        // const contactProperties = contact.properties;
+        // const compaign = contactProperties.utm_campaign
+
         // Populate UTM parameters into custom properties
         var pageUrl = 'https://www.example.com/?utm_campaign=test_campaign&utm_medium=test_medium&utm_source=test_source&utm_content=test_content&utm_term=test_term&campaign_id=123&user_id=456';
         var urlParams = new URLSearchParams(pageUrl.split('?')[1]);
@@ -132,11 +173,11 @@ async function updateContact(contactId, accessToken) {
         // Update the contact with the merged properties
         const updateData = {
             properties: {
-            utm_campaign1: urlParams.get('utm_campaign') || '',
-            utm_source1: urlParams.get('utm_source') || '',
-            utm_medium1: urlParams.get('utm_medium') || '',
-            utm_term1: urlParams.get('utm_term') || '',
-            utm_content1: urlParams.get('utm_content') || '',
+            utm_campaign: urlParams.get('utm_campaign') || '',
+            utm_source: urlParams.get('utm_source') || '',
+            utm_medium: urlParams.get('utm_medium') || '',
+            utm_term: urlParams.get('utm_term') || '',
+            utm_content: urlParams.get('utm_content') || '',
             user_id: urlParams.get('user_id') || '',
             utm_campaign_first_touch: urlParams.get('utm_campaign') || '',
             utm_source_first_touch: urlParams.get('utm_source') || '',
@@ -162,11 +203,47 @@ async function updateContact(contactId, accessToken) {
     }
 }
 
+// function for updating the last touch properties of recently updated contacts only
+async function updateLastTouchOfRecentlyUpdatedContact(recentlyUpdatedContactId, accessToken) {
+    try {      
+        const hubspotClient = new hubspot.Client({ "accessToken": accessToken});
+
+        // Populate UTM parameters into custom properties
+        var pageUrl = 'https://www.example.com/?utm_campaign=last&utm_medium=last&utm_source=last&utm_content=last&utm_term=last&campaign_id=123&user_id=456';
+        var urlParams = new URLSearchParams(pageUrl.split('?')[1]);
+    
+        // Update the contact with the merged properties
+        const updateData = {
+            properties: {
+            utm_campaign: urlParams.get('utm_campaign') || '',
+            utm_source: urlParams.get('utm_source') || '',
+            utm_medium: urlParams.get('utm_medium') || '',
+            utm_term: urlParams.get('utm_term') || '',
+            utm_content: urlParams.get('utm_content') || '',
+            user_id: urlParams.get('user_id') || '',
+            utm_campaign_last_touch: urlParams.get('utm_campaign') || '',
+            utm_source_last_touch: urlParams.get('utm_source') || '',
+            utm_medium_last_touch: urlParams.get('utm_medium') || '',
+            utm_term_last_touch: urlParams.get('utm_term') || '',
+            utm_content_last_touch: urlParams.get('utm_content') || '',
+            }
+        };
+    
+        const updateResponse = await hubspotClient.crm.contacts.basicApi.update(recentlyUpdatedContactId, updateData);
+        console.log('Data added successfully against this ID:', updateResponse);
+        console.log(JSON.stringify(updateResponse.id, null, 2));
+    } catch (e) {
+        e.message === 'HTTP request failed'
+        ? console.error(JSON.stringify(e.response, null, 2))
+        : console.error(e);
+    }
+}
+
 // code for createing custom fields in HubSpot for UTM Tracking App  
 const propertiesToCreate =[
     {
-      name: "utm_campaign1",
-      label: "UTM_Campaign1",
+      name: "utm_campaign",
+      label: "utm_campaign",
       type: "string",
       fieldType: "text",
       groupName: "contactinformation",
@@ -176,8 +253,8 @@ const propertiesToCreate =[
       formField: true
     },
     {
-        name: "utm_source1",
-        label: "UTM_Source1",
+        name: "utm_source",
+        label: "utm_source",
         type: "string",
         fieldType: "text",
         groupName: "contactinformation",
@@ -187,8 +264,8 @@ const propertiesToCreate =[
         formField: true
     },
     {
-        name: "utm_medium1",
-        label: "UTM_Medium1",
+        name: "utm_medium",
+        label: "utm_medium",
         type: "string",
         fieldType: "text",
         groupName: "contactinformation",
@@ -198,8 +275,8 @@ const propertiesToCreate =[
         formField: true
     },
     {
-          name: "utm_term1",
-          label: "UTM_Term1",
+          name: "utm_term",
+          label: "utm_term",
           type: "string",
           fieldType: "text",
           groupName: "contactinformation",
@@ -209,8 +286,8 @@ const propertiesToCreate =[
           formField: true
     },
     {
-          name: "utm_content1",
-          label: "UTM_Content1",
+          name: "utm_content",
+          label: "utm_content",
           type: "string",
           fieldType: "text",
           groupName: "contactinformation",
